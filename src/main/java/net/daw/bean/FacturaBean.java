@@ -5,18 +5,18 @@
  */
 package net.daw.bean;
 
-
-
+import java.util.Date;
 
 /**
  *
- * @author a044879742a
+ * @author a044531896d
  */
 public class FacturaBean {
-  	private int id;
-        private date fecha; 
-        private float iva;
-        private int id_usuario;
+
+    private int id;
+    private Date fecha;
+    private double iva;
+    private int id_usuario;
 
     public int getId() {
         return id;
@@ -26,19 +26,19 @@ public class FacturaBean {
         this.id = id;
     }
 
-    public date getFecha() {
+    public Date getFecha() {
         return fecha;
     }
 
-    public void setFecha(date fecha) {
+    public void setFecha(Date fecha) {
         this.fecha = fecha;
     }
 
-    public float getIva() {
+    public double getIva() {
         return iva;
     }
 
-    public void setIva(float iva) {
+    public void setIva(double iva) {
         this.iva = iva;
     }
 
@@ -49,9 +49,5 @@ public class FacturaBean {
     public void setId_usuario(int id_usuario) {
         this.id_usuario = id_usuario;
     }
-	
 
-
-	
-    
 }

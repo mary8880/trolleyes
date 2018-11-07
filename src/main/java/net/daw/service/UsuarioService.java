@@ -1,26 +1,47 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package net.daw.service;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.io.BufferedInputStream;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
-
-import com.google.gson.Gson;
-
 import net.daw.bean.ReplyBean;
-import net.daw.bean.TipousuarioBean;
+import net.daw.bean.UsuarioBean;
 import net.daw.connection.publicinterface.ConnectionInterface;
 import net.daw.constant.ConnectionConstants;
-import net.daw.dao.TipousuarioDao;
+import net.daw.dao.UsuarioDao;
 import net.daw.factory.ConnectionFactory;
 import net.daw.helper.EncodingHelper;
+import net.daw.helper.ParameterCook;
 
-public class TipousuarioService {
+import org.apache.commons.io.IOUtils;
 
+/**
+ *
+ * @author Ramón
+ */
+public class UsuarioService {
 	HttpServletRequest oRequest;
 	String ob = null;
 
-	public TipousuarioService(HttpServletRequest oRequest) {
+	public UsuarioService(HttpServletRequest oRequest) {
 		super();
 		this.oRequest = oRequest;
 		ob = oRequest.getParameter("ob");
@@ -34,10 +55,11 @@ public class TipousuarioService {
 			Integer id = Integer.parseInt(oRequest.getParameter("id"));
 			oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
 			oConnection = oConnectionPool.newConnection();
-			TipousuarioDao oTipousuarioDao = new TipousuarioDao(oConnection, ob);
-			TipousuarioBean oTipousuarioBean = oTipousuarioDao.get(id);
-			Gson oGson = new Gson();
-			oReplyBean = new ReplyBean(200, oGson.toJson(oTipousuarioBean));
+			UsuarioDao oUsuarioDao = new UsuarioDao(oConnection, ob);
+			UsuarioBean oUsuarioBean = oUsuarioDao.get(id);
+			//Gson oGson = new Gson();			
+			Gson oGson = (new GsonBuilder()).excludeFieldsWithoutExposeAnnotation().create();
+			oReplyBean = new ReplyBean(200, oGson.toJson(oUsuarioBean));
 		} catch (Exception ex) {
 			throw new Exception("ERROR: Service level: get method: " + ob + " object", ex);
 		} finally {
@@ -56,8 +78,8 @@ public class TipousuarioService {
 			Integer id = Integer.parseInt(oRequest.getParameter("id"));
 			oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
 			oConnection = oConnectionPool.newConnection();
-			TipousuarioDao oTipousuarioDao = new TipousuarioDao(oConnection, ob);
-			int iRes = oTipousuarioDao.remove(id);
+			UsuarioDao oUsuarioDao = new UsuarioDao(oConnection, ob);
+			int iRes = oUsuarioDao.remove(id);
 			oReplyBean = new ReplyBean(200, Integer.toString(iRes));
 		} catch (Exception ex) {
 			throw new Exception("ERROR: Service level: remove method: " + ob + " object", ex);
@@ -75,9 +97,9 @@ public class TipousuarioService {
 		try {
 			oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
 			oConnection = oConnectionPool.newConnection();
-			TipousuarioDao oTipousuarioDao = new TipousuarioDao(oConnection, ob);
-			int registros = oTipousuarioDao.getcount();
-			Gson oGson = new Gson();
+			UsuarioDao oUsuarioDao = new UsuarioDao(oConnection, ob);
+			int registros = oUsuarioDao.getcount();
+			Gson oGson = (new GsonBuilder()).excludeFieldsWithoutExposeAnnotation().create();
 			oReplyBean = new ReplyBean(200, oGson.toJson(registros));
 		} catch (Exception ex) {
 			throw new Exception("ERROR: Service level: getcount method: " + ob + " object", ex);
@@ -95,14 +117,14 @@ public class TipousuarioService {
 		Connection oConnection;
 		try {
 			String strJsonFromClient = oRequest.getParameter("json");
-			Gson oGson = new Gson();
-			TipousuarioBean oTipousuarioBean = new TipousuarioBean();
-			oTipousuarioBean = oGson.fromJson(strJsonFromClient, TipousuarioBean.class);
+			Gson oGson = (new GsonBuilder()).excludeFieldsWithoutExposeAnnotation().create();								
+			UsuarioBean oUsuarioBean = new UsuarioBean();
+			oUsuarioBean = oGson.fromJson(strJsonFromClient, UsuarioBean.class);
 			oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
 			oConnection = oConnectionPool.newConnection();
-			TipousuarioDao oTipousuarioDao = new TipousuarioDao(oConnection, ob);
-			oTipousuarioBean = oTipousuarioDao.create(oTipousuarioBean);
-			oReplyBean = new ReplyBean(200, oGson.toJson(oTipousuarioBean));
+			UsuarioDao oUsuarioDao = new UsuarioDao(oConnection, ob);
+			oUsuarioBean = oUsuarioDao.create(oUsuarioBean);
+			oReplyBean = new ReplyBean(200, oGson.toJson(oUsuarioBean));
 		} catch (Exception ex) {
 			throw new Exception("ERROR: Service level: create method: " + ob + " object", ex);
 		} finally {
@@ -118,14 +140,14 @@ public class TipousuarioService {
 		Connection oConnection;
 		try {
 			String strJsonFromClient = oRequest.getParameter("json");
-			Gson oGson = new Gson();
-			TipousuarioBean oTipousuarioBean = new TipousuarioBean();
-			oTipousuarioBean = oGson.fromJson(strJsonFromClient, TipousuarioBean.class);
+			Gson oGson = (new GsonBuilder()).excludeFieldsWithoutExposeAnnotation().create();
+			UsuarioBean oUsuarioBean = new UsuarioBean();
+			oUsuarioBean = oGson.fromJson(strJsonFromClient, UsuarioBean.class);
 			oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
 			oConnection = oConnectionPool.newConnection();
-			TipousuarioDao oTipousuarioDao = new TipousuarioDao(oConnection, ob);
-			iRes = oTipousuarioDao.update(oTipousuarioBean);
-                        oReplyBean = new ReplyBean(200,Integer.toString(iRes));
+			UsuarioDao oUsuarioDao = new UsuarioDao(oConnection, ob);
+			iRes = oUsuarioDao.update(oUsuarioBean);
+			oReplyBean = new ReplyBean(200, Integer.toString(iRes));
 		} catch (Exception ex) {
 			throw new Exception("ERROR: Service level: update method: " + ob + " object", ex);
 		} finally {
@@ -141,20 +163,53 @@ public class TipousuarioService {
 		try {
 			Integer iRpp = Integer.parseInt(oRequest.getParameter("rpp"));
 			Integer iPage = Integer.parseInt(oRequest.getParameter("page"));
+			HashMap<String, String> hmOrder = ParameterCook.getOrderParams(oRequest.getParameter("order"));
 			oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
 			oConnection = oConnectionPool.newConnection();
-			TipousuarioDao oTipousuarioDao = new TipousuarioDao(oConnection, ob);
-			ArrayList<TipousuarioBean> alTipousuarioBean = oTipousuarioDao.getpage(iRpp, iPage);
-			Gson oGson = new Gson();
-			oReplyBean = new ReplyBean(200, oGson.toJson(alTipousuarioBean));
+			UsuarioDao oUsuarioDao = new UsuarioDao(oConnection, ob);
+			ArrayList<UsuarioBean> alUsuarioBean = oUsuarioDao.getpage(iRpp, iPage, hmOrder);
+			Gson oGson = (new GsonBuilder()).excludeFieldsWithoutExposeAnnotation().create();
+			oReplyBean = new ReplyBean(200, oGson.toJson(alUsuarioBean));
 		} catch (Exception ex) {
-			throw new Exception("ERROR: Service level: getpage method: " + ob + " object", ex);
+			throw new Exception("ERROR: Service level: get page: " + ob + " object", ex);
 		} finally {
 			oConnectionPool.disposeConnection();
 		}
 
 		return oReplyBean;
 
+	}
+
+	
+
+	public ReplyBean fill() throws Exception {
+		ReplyBean oReplyBean;
+		ConnectionInterface oConnectionPool = null;
+		Connection oConnection;
+		try {
+			Integer number = Integer.parseInt(oRequest.getParameter("number"));
+			Gson oGson = (new GsonBuilder()).excludeFieldsWithoutExposeAnnotation().create();
+			oConnectionPool = ConnectionFactory.getConnection(ConnectionConstants.connectionPool);
+			oConnection = oConnectionPool.newConnection();
+			UsuarioDao oUsuarioDao = new UsuarioDao(oConnection, ob);
+			UsuarioBean oUsuarioBean = new UsuarioBean();
+			for (int i = 1; i <= number; i++) {
+				oUsuarioBean.setDni("765934875A");
+				oUsuarioBean.setNombre("Rigoberto");
+				oUsuarioBean.setApe1("Pérez");
+				oUsuarioBean.setApe2("Gómez");
+				oUsuarioBean.setLogin("ripego");
+				oUsuarioBean.setPass("hola");
+				oUsuarioBean.setId_tipoUsuario(2);
+				oUsuarioBean = oUsuarioDao.create(oUsuarioBean);
+			}
+			oReplyBean = new ReplyBean(200, oGson.toJson(number));
+		} catch (Exception ex) {
+			throw new Exception("ERROR: Service level: create method: " + ob + " object", ex);
+		} finally {
+			oConnectionPool.disposeConnection();
+		}
+		return oReplyBean;
 	}
 
 }
