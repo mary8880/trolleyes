@@ -58,6 +58,37 @@ public class FacturaDao {
 		}
 		return oFacturaBean;
 	}
+        public FacturaBean getXusu(int id_usuario) throws Exception {
+		String strSQL = "SELECT * FROM " + ob + " WHERE id_usuario=?";
+		FacturaBean oFacturaBean;
+		ResultSet oResultSet = null;
+		PreparedStatement oPreparedStatement = null;
+		try {
+			oPreparedStatement = oConnection.prepareStatement(strSQL);
+                        oPreparedStatement.setInt(1, id_usuario);
+			oResultSet = oPreparedStatement.executeQuery();
+			if (oResultSet.next()) {
+				oFacturaBean = new FacturaBean();
+				oFacturaBean.setId(oResultSet.getInt("id"));
+                                oFacturaBean.setFecha(oResultSet.getDate("fecha"));
+                                oFacturaBean.setIva(oResultSet.getDouble("iva"));
+                                oFacturaBean.setId_usuario(oResultSet.getInt("id_usuario"));
+			} else {
+				oFacturaBean = null;
+			}
+		} catch (SQLException e) {
+			throw new Exception("Error en Dao get de " + ob, e);
+		} finally {
+			if (oResultSet != null) {
+				oResultSet.close();
+			}
+			if (oPreparedStatement != null) {
+				oPreparedStatement.close();
+			}
+		}
+		return oFacturaBean;
+	}
+
 
 	public int remove(int id) throws Exception {
 		int iRes = 0;
@@ -100,6 +131,31 @@ public class FacturaDao {
 		}
 		return res;
 	}
+        public int getcountXusu(int id_usuario) throws Exception {
+		String strSQL = "SELECT COUNT(id) FROM" +ob+ " WHERE id_usuario=?";
+		int res = 0;
+		ResultSet oResultSet = null;
+		PreparedStatement oPreparedStatement = null;
+		try {
+			oPreparedStatement = oConnection.prepareStatement(strSQL);
+                        oPreparedStatement.setInt(1, id_usuario);
+			oResultSet = oPreparedStatement.executeQuery();
+			if (oResultSet.next()) {
+				res = oResultSet.getInt(1);
+			}
+		} catch (SQLException e) {
+			throw new Exception("Error en Dao get de " + ob, e);
+		} finally {
+			if (oResultSet != null) {
+				oResultSet.close();
+			}
+			if (oPreparedStatement != null) {
+				oPreparedStatement.close();
+			}
+		}
+		return res;
+	}
+
 
 	public FacturaBean create(FacturaBean oFacturaBean) throws Exception {
 		String strSQL = "INSERT INTO " + ob + " ( "+ob+".id,  "+ob+".fecha,  "+ob+".iva, "+ob+".id_usuario) VALUES (NULL, ?,?,?); ";
@@ -154,6 +210,41 @@ public class FacturaDao {
 
 	public ArrayList<FacturaBean> getpage(int iRpp, int iPage) throws Exception {
 		String strSQL = "SELECT * FROM " + ob;
+		ArrayList<FacturaBean> alFacturaBean;
+		if (iRpp > 0 && iRpp < 100000 && iPage > 0 && iPage < 100000000) {
+			strSQL += " LIMIT " + (iPage - 1) * iRpp + ", " + iRpp;
+			ResultSet oResultSet = null;
+			PreparedStatement oPreparedStatement = null;
+			try {
+				oPreparedStatement = oConnection.prepareStatement(strSQL);
+				oResultSet = oPreparedStatement.executeQuery();
+				alFacturaBean = new ArrayList<FacturaBean>();
+				while (oResultSet.next()) {
+					FacturaBean oFacturaBean = new FacturaBean();
+                                        oFacturaBean.setId(oResultSet.getInt("id"));
+                                        oFacturaBean.setFecha(oResultSet.getDate("fecha"));
+                                        oFacturaBean.setIva(oResultSet.getDouble("iva"));
+                                        oFacturaBean.setId_usuario(oResultSet.getInt("id_usuario"));
+					alFacturaBean.add(oFacturaBean);
+				}
+			} catch (SQLException e) {
+				throw new Exception("Error en Dao getpage de " + ob, e);
+			} finally {
+				if (oResultSet != null) {
+					oResultSet.close();
+				}
+				if (oPreparedStatement != null) {
+					oPreparedStatement.close();
+				}
+			}
+		} else {
+			throw new Exception("Error en Dao getpage de " + ob);
+		}
+		return alFacturaBean;
+
+	}
+        public ArrayList<FacturaBean> getpageXusu(int id_usuario,int iRpp, int iPage) throws Exception {
+		String strSQL = "SELECT * FROM " + ob+" WHERE id_usuario=?"+id_usuario;
 		ArrayList<FacturaBean> alFacturaBean;
 		if (iRpp > 0 && iRpp < 100000 && iPage > 0 && iPage < 100000000) {
 			strSQL += " LIMIT " + (iPage - 1) * iRpp + ", " + iRpp;
